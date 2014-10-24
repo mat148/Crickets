@@ -27,7 +27,7 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-    var convert = 2.0;
+    var convert = -25;
     
     // once everything is loaded, we run our Three.js stuff.
     $(function () {
@@ -40,7 +40,7 @@
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 	scene.add(camera);
-	camera.position.set(0,150,200);
+	camera.position.set(0,50,200);
 	camera.lookAt(scene.position);
 
         // create a render and set the size
@@ -54,28 +54,14 @@
         var planeGeometry = new THREE.PlaneGeometry(200,200);
         var planeMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
         var plane = new THREE.Mesh(planeGeometry,planeMaterial);
-        plane.receiveShadow  = true;
+        //plane.receiveShadow  = true;
 
         // rotate and position the plane
-        plane.position.y = -0.5;
-	plane.rotation.x = Math.PI / 2;
+        plane.position.y = 0;
+	plane.rotation.x = 30;
 
         // add the plane to the scene
         scene.add(plane);
-
-        // create a cube
-        var cubeGeometry = new THREE.CubeGeometry(4,4,4);
-        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
-        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.castShadow = true;
-
-        // position the cube
-        cube.position.x=0;
-        cube.position.y=0;
-        cube.position.z=2.0;
-
-        // add the cube to the scene
-        scene.add(cube);
         
         // load heart
         var heartModel = new THREE.JSONLoader();
@@ -85,11 +71,11 @@
         heartMesh = new THREE.Mesh(heart, heartMaterial);
         scene.add(heartMesh);
         
-        heartMesh.position.set(100, 50, -50);
+        heartMesh.position.set(0, -25, 0);
 
         // add spotlight for the shadow
         var spotLight = new THREE.SpotLight( 0xffffff );
-        spotLight.position.set(0,250,0);
+        spotLight.position.set(-150,250,150);
         spotLight.castShadow = true;
         scene.add( spotLight );
 
@@ -102,18 +88,18 @@
         
         function render() {
           
-          cubeAnimate();
+          heartAnimate();
           
-          function cubeAnimate() {
-            if (convert != 12.2) {
+          function heartAnimate() {
+            if (convert != 23) {
               
-              cube.position.z += 0.3;
-              convert = cube.position.z.toFixed(1);
+              heartMesh.position.y += 1;
+              convert = heartMesh.position.y.toFixed(1);
               console.log(convert);
               
             }
             
-            if (convert == 12.2) {
+            if (convert == 23) {
               //alert('yo');
             }
             

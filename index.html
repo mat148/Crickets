@@ -32,6 +32,8 @@
     
     var scene, camera, renderer;
     
+    var heartMesh;
+    
     init();
     
     render();
@@ -78,9 +80,35 @@
 	  heartMesh = new THREE.Mesh(heart, heartMaterial);
 	  scene.add(heartMesh);
 	  heartMesh.position.set(0, -25, 0);
-	  var heartPosition = {x:0, y:-25};
-	  var heartTarget = {x:0, y:23};
+	  
+	  setUpTween();
+	  
 	});
+	
+	var numPoints = 50;
+			
+	spline = new THREE.SplineCurve3([
+	  new THREE.Vector3( 0, 0, 0 ),
+	  new THREE.Vector3( 0, 200, 0 ),
+	  new THREE.Vector3( 150, 150, 0 ),
+	  new THREE.Vector3( 150, 50, 0 ),
+	  new THREE.Vector3( 250, 100, 0 ),
+	  new THREE.Vector3( 250, 300, 0 )
+	]);
+			
+	var material = new THREE.LineBasicMaterial({
+	  color: 0xff00f0,
+	});
+			
+	var geometry = new THREE.Geometry();
+	var splinePoints = spline.getPoints( numPoints );
+			
+	for( var i = 0; i < splinePoints.length; i++ ){
+	  geometry.vertices.push( splinePoints[i] );  
+	}
+			
+	var line = new THREE.Line( geometry, material );
+	scene.add( line );
 	
         // add spotlight for the shadow
         var spotLight = new THREE.SpotLight( 0xffffff );
@@ -90,6 +118,7 @@
 
         // add the output of the renderer to the html element
         $("#WebGL-output").append(renderer.domElement);
+	
     }
         
     function render() {
@@ -98,13 +127,27 @@
     }
     
     function setUpTween() {
+      var heartInc = 3;
+      //heartCurPosX = heartMeshPos.position.x;
+      //heartCurPosY = heartMeshPos.position.y;
       
-      var heartCurPosX;
-      var heartCurPosY;
-      var heartInc;
+      heartInc += 0.000035;
       
-      heartCurPosX = heartMesh.position.x;
-      heartCurPosY = heartMesh.position.y;
+      console.log(heartMesh.position.y);
+      
+      heartMesh.position.y += (1/heartInc);
+      
+      console.log(heartMesh.position.y);
+      
+      if (heartMesh.position.y >= 23) {
+	
+	heartMesh.position.y = 23;
+	
+	heartInc = 0.0;
+	
+      }
+      
+      requestAnimationFrame(setUpTween);
       
     }
 

@@ -30,7 +30,7 @@
 <script type="text/javascript">
     // once everything is loaded, we run our Three.js stuff.
     
-    var scene, camera, renderer;
+    var scene, camera, renderer, box, spline, counter;
     
     var heartMesh;
     
@@ -88,12 +88,24 @@
 	var numPoints = 50;
 			
 	spline = new THREE.SplineCurve3([
-	  new THREE.Vector3( 0, 0, 0 ),
-	  new THREE.Vector3( 0, 200, 0 ),
-	  new THREE.Vector3( 150, 150, 0 ),
-	  new THREE.Vector3( 150, 50, 0 ),
-	  new THREE.Vector3( 250, 100, 0 ),
-	  new THREE.Vector3( 250, 300, 0 )
+	  new THREE.Vector3( -12, 23, -12),
+	  new THREE.Vector3( -16, 23, -5),
+	  new THREE.Vector3( -13, 23, 5),
+	  new THREE.Vector3( -7, 23, 13),
+	  new THREE.Vector3( 2, 23, 13),
+	  new THREE.Vector3( 10, 23, 10),
+	  new THREE.Vector3( 16, 23, 2),
+	  new THREE.Vector3( 16, 23, -5),
+	  new THREE.Vector3( 11, 23, -13),
+	  new THREE.Vector3( 4, 23, -22),
+	  new THREE.Vector3( -4, 23, -35),
+	  new THREE.Vector3( -11, 23, -45),
+	  new THREE.Vector3( -20, 23, -57),
+	  new THREE.Vector3( -30, 23, -71),
+	  new THREE.Vector3( -43, 23, -89),
+	  new THREE.Vector3( -57, 23, -109),
+	  new THREE.Vector3( -71, 23, -127),
+	  new THREE.Vector3( -84, 23, -146)
 	]);
 			
 	var material = new THREE.LineBasicMaterial({
@@ -110,6 +122,14 @@
 	var line = new THREE.Line( geometry, material );
 	scene.add( line );
 	
+	
+	geometry = new THREE.CubeGeometry( 2, 2, 2 );
+        material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+
+       	box = new THREE.Mesh( geometry, material );
+       	scene.add( box );
+	
+	
         // add spotlight for the shadow
         var spotLight = new THREE.SpotLight( 0xffffff );
         spotLight.position.set(-150,250,150);
@@ -118,6 +138,10 @@
 
         // add the output of the renderer to the html element
         $("#WebGL-output").append(renderer.domElement);
+	
+	
+	alert('yo!');
+	setInterval(attachBox, 100);
 	
     }
         
@@ -148,6 +172,18 @@
       }
       
       requestAnimationFrame(setUpTween);
+      
+    }
+    
+    function attachBox() {
+      
+      if ( counter <= 1 ) {
+	box.position = spline.getPoint( counter );
+	box.rotation = spline.getTangent( counter );
+	counter += 0.005
+      } else {
+	counter = 0;
+      }
       
     }
 

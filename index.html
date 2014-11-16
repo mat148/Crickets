@@ -21,16 +21,23 @@
   </style>
 </head>
 <body>
+    
+    <audio id="cricketsAudio" controls>
+        <source src="music/TheCricketsHaveArthritis.mp3" type="audio/mpeg">
+        Your browser doesn't support the audio element.
+    </audio>
 
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
     // once everything is loaded, we run our Three.js stuff.
     
     var scene, camera, renderer, box, spline, counter;
+    
+    var music = document.getElementById("cricketsAudio");
     
     var heartMesh;
     
@@ -39,17 +46,25 @@
     render();
     
     function init() {
-
+        music.controls = true;
+        music.play();
+        
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         scene = new THREE.Scene();
 
         // create a camera, which defines where we're looking at.
         var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
-	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-	scene.add(camera);
-	camera.position.set(0,50,150);
-	camera.lookAt(scene.position);
+	   var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	   camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	   scene.add(camera);
+	   camera.position.set(0,100,180);
+        camera.rotation.set(-10,0,0);
+	   
+        // add spotlight for the shadow
+        var spotLight = new THREE.SpotLight( 0xffffff );
+        spotLight.position.set(-150,250,150);
+        spotLight.castShadow = true;
+        scene.add( spotLight );
 
         // create a render and set the size
         renderer = new THREE.WebGLRenderer();
@@ -65,8 +80,8 @@
         //plane.receiveShadow  = true;
 
         // rotate and position the plane
-        plane.position.y = 0;
-	plane.rotation.x = 30;
+        plane.position.set(0,0,-200);
+        plane.rotation.set(90,0,0);
 
         // add the plane to the scene
         scene.add(plane);
@@ -74,80 +89,88 @@
         // load heart
         var heartModel = new THREE.JSONLoader();
 	
-        heartModel.load( "models/heart.js", function(heart){
-	  var heartMaterial = new THREE.MeshLambertMaterial();
-	  heartMaterial.color.setHex(0xc93c2d);
-	  heartMesh = new THREE.Mesh(heart, heartMaterial);
-	  scene.add(heartMesh);
-	  heartMesh.position.set(0, -25, 0);
-	  
-	  setUpTween();
-	  
-	});
-	
-	var numPoints = 50;
-			
-	spline = new THREE.SplineCurve3([
-	  new THREE.Vector3( -12, 23, -12),
-	  new THREE.Vector3( -16, 23, -5),
-	  new THREE.Vector3( -13, 23, 5),
-	  new THREE.Vector3( -7, 23, 13),
-	  new THREE.Vector3( 2, 23, 13),
-	  new THREE.Vector3( 10, 23, 10),
-	  new THREE.Vector3( 16, 23, 2),
-	  new THREE.Vector3( 16, 23, -5),
-	  new THREE.Vector3( 11, 23, -13),
-	  new THREE.Vector3( 4, 23, -22),
-	  new THREE.Vector3( -4, 23, -35),
-	  new THREE.Vector3( -11, 23, -45),
-	  new THREE.Vector3( -20, 23, -57),
-	  new THREE.Vector3( -30, 23, -71),
-	  new THREE.Vector3( -43, 23, -89),
-	  new THREE.Vector3( -57, 23, -109),
-	  new THREE.Vector3( -71, 23, -127),
-	  new THREE.Vector3( -84, 23, -146)
-	]);
-			
-	var material = new THREE.LineBasicMaterial({
-	  color: 0xff00f0,
-	});
-			
-	var geometry = new THREE.Geometry();
-	var splinePoints = spline.getPoints( numPoints );
-			
-	for( var i = 0; i < splinePoints.length; i++ ){
-	  geometry.vertices.push( splinePoints[i] );  
-	}
-			
-	var line = new THREE.Line( geometry, material );
-	scene.add( line );
-	
-	
-	geometry = new THREE.CubeGeometry( 2, 2, 2 );
+        heartModel.load( "models/heart.js", function(heart)
+        {   
+            var heartMaterial = new THREE.MeshLambertMaterial();
+            heartMaterial.color.setHex(0xc93c2d);
+            heartMesh = new THREE.Mesh(heart, heartMaterial);
+            scene.add(heartMesh);
+            heartMesh.position.set(0, 17, -250);   
+        });
+        
+        //load temp box
+        geometry = new THREE.CubeGeometry( 2, 2, 2 );
         material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 
        	box = new THREE.Mesh( geometry, material );
        	scene.add( box );
 	
-	
-        // add spotlight for the shadow
-        var spotLight = new THREE.SpotLight( 0xffffff );
-        spotLight.position.set(-150,250,150);
-        spotLight.castShadow = true;
-        scene.add( spotLight );
+        var numPoints = 50;
+
+        spline = new THREE.SplineCurve3([
+          new THREE.Vector3( -12, 23, -12),
+          new THREE.Vector3( -16, 23, -5),
+          new THREE.Vector3( -13, 23, 5),
+          new THREE.Vector3( -7, 23, 13),
+          new THREE.Vector3( 2, 23, 13),
+          new THREE.Vector3( 10, 23, 10),
+          new THREE.Vector3( 16, 23, 2),
+          new THREE.Vector3( 16, 23, -5),
+          new THREE.Vector3( 11, 23, -13),
+          new THREE.Vector3( 4, 23, -22),
+          new THREE.Vector3( -4, 23, -35),
+          new THREE.Vector3( -11, 23, -45),
+          new THREE.Vector3( -20, 23, -57),
+          new THREE.Vector3( -30, 23, -71),
+          new THREE.Vector3( -43, 23, -89),
+          new THREE.Vector3( -57, 23, -109),
+          new THREE.Vector3( -71, 23, -127),
+          new THREE.Vector3( -84, 23, -146)
+        ]);
+
+        var material = new THREE.LineBasicMaterial({
+          color: 0xff00f0,
+        });
+
+        var geometry = new THREE.Geometry();
+        var splinePoints = spline.getPoints( numPoints );
+			
+        for( var i = 0; i < splinePoints.length; i++ ){
+          geometry.vertices.push( splinePoints[i] );  
+        }
+			
+	   var line = new THREE.Line( geometry, material );
+	   scene.add( line );
 
         // add the output of the renderer to the html element
         $("#WebGL-output").append(renderer.domElement);
-	
-	
-	alert('yo!');
-	setInterval(attachBox, 100);
-	
     }
+    
+    a=0;
+    b=0;
         
     function render() {
 	requestAnimationFrame(render);
         renderer.render(scene, camera);
+        
+        console.log(Math.floor(music.currentTime));
+        if(Math.floor(music.currentTime) == 10)
+        {
+            if(a == 0)
+            {
+              setUpTween();
+                a++;
+            }
+        }
+        
+        if(Math.floor(music.currentTime) == 13)
+        {
+            if(b == 0)
+            {
+                setInterval(attachBox, 35);
+                b++;
+            }
+        }
     }
     
     function setUpTween() {

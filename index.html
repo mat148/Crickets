@@ -18,6 +18,10 @@
       overflow: hidden;
     }
     
+    .heartClass{
+      position.set(0,50,0);
+    }
+    
   </style>
 </head>
 <body>
@@ -40,12 +44,18 @@
     var music = document.getElementById("cricketsAudio");
     
     var heartMesh;
+    var planeMesh;
     
     init();
     
     render();
     
     function init() {
+      
+	a=0;
+	b=0;
+	c=0;
+	
         music.controls = true;
         music.play();
         
@@ -54,11 +64,12 @@
 
         // create a camera, which defines where we're looking at.
         var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-	   var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
-	   camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-	   scene.add(camera);
-	   camera.position.set(0,100,180);
-        camera.rotation.set(-10,0,0);
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0,150,700);
+	//120
+        camera.lookAt(scene.position);
 	   
         // add spotlight for the shadow
         var spotLight = new THREE.SpotLight( 0xffffff );
@@ -72,94 +83,162 @@
         renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMapEnabled = true;
+	
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
 
         // create the ground plane
-        var planeGeometry = new THREE.PlaneGeometry(200,200);
-        var planeMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
-        var plane = new THREE.Mesh(planeGeometry,planeMaterial);
+        var floorGeometry = new THREE.PlaneGeometry(100,100);
+        var floorMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
+        var floor = new THREE.Mesh(floorGeometry,floorMaterial);
         //plane.receiveShadow  = true;
 
         // rotate and position the plane
-        plane.position.set(0,0,-200);
-        plane.rotation.set(90,0,0);
-
+        floor.position.set(0,0,0);
+	floor.rotation.set(-90,0,0);
+	
         // add the plane to the scene
-        scene.add(plane);
+        scene.add(floor);
         
         // load heart
         var heartModel = new THREE.JSONLoader();
 	
-        heartModel.load( "models/heart.js", function(heart)
+        heartModel.load( "models/plane.js", function(heart)
         {   
             var heartMaterial = new THREE.MeshLambertMaterial();
             heartMaterial.color.setHex(0xc93c2d);
             heartMesh = new THREE.Mesh(heart, heartMaterial);
             scene.add(heartMesh);
-            heartMesh.position.set(0, 17, -250);   
+            heartMesh.position.set(0,-23,0);
+	    heartMesh.rotation.set(-0.3,0,0);
         });
+	
+	/*// load plane
+        var planeModel = new THREE.JSONLoader();
+	
+        planeModel.load( "models/plane.js", function(plane)
+        {   
+            var planeMaterial = new THREE.MeshLambertMaterial();
+            planeMaterial.color.setHex(0xc93c2d);
+            planeMesh = new THREE.Mesh(plane, planeMaterial);
+            scene.add(planeMesh);
+            planeMesh.position.set(0,0,0);
+	    //planeMesh.scale.set(10,10,10);
+	    //planeMesh.rotation.set(-0.3,0,0);
+        });*/
         
-        //load temp box
+        /*//load temp box
         geometry = new THREE.CubeGeometry( 2, 2, 2 );
         material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 
        	box = new THREE.Mesh( geometry, material );
-       	scene.add( box );
+       	scene.add( box );*/
 	
-        var numPoints = 50;
-
-        spline = new THREE.SplineCurve3([
-          new THREE.Vector3( -12, 23, -12),
-          new THREE.Vector3( -16, 23, -5),
-          new THREE.Vector3( -13, 23, 5),
-          new THREE.Vector3( -7, 23, 13),
-          new THREE.Vector3( 2, 23, 13),
-          new THREE.Vector3( 10, 23, 10),
-          new THREE.Vector3( 16, 23, 2),
-          new THREE.Vector3( 16, 23, -5),
-          new THREE.Vector3( 11, 23, -13),
-          new THREE.Vector3( 4, 23, -22),
-          new THREE.Vector3( -4, 23, -35),
-          new THREE.Vector3( -11, 23, -45),
-          new THREE.Vector3( -20, 23, -57),
-          new THREE.Vector3( -30, 23, -71),
-          new THREE.Vector3( -43, 23, -89),
-          new THREE.Vector3( -57, 23, -109),
-          new THREE.Vector3( -71, 23, -127),
-          new THREE.Vector3( -84, 23, -146)
-        ]);
-
-        var material = new THREE.LineBasicMaterial({
-          color: 0xff00f0,
-        });
-
-        var geometry = new THREE.Geometry();
-        var splinePoints = spline.getPoints( numPoints );
-			
-        for( var i = 0; i < splinePoints.length; i++ ){
-          geometry.vertices.push( splinePoints[i] );  
-        }
-			
-	   var line = new THREE.Line( geometry, material );
-	   scene.add( line );
+	planeSplineSetUp();
+	cameraSplineSetUp();
 
         // add the output of the renderer to the html element
         $("#WebGL-output").append(renderer.domElement);
     }
     
-    a=0;
-    b=0;
-        
+    function planeSplineSetUp()
+    {
+      // smooth my curve over this many points
+      var numPoints = 100;
+      
+      //spline
+      planeSpline = new THREE.SplineCurve3
+      ([
+	new THREE.Vector3( 0, 23, -18),
+	new THREE.Vector3( 10, 23, -14),
+        new THREE.Vector3( 17, 23, -5),
+	new THREE.Vector3( 17, 23, 6),
+        new THREE.Vector3( 10, 23, 15),
+        new THREE.Vector3( -3, 23, 18),
+        new THREE.Vector3( -15, 23, 10),
+        new THREE.Vector3( -23, 23, -10),
+	new THREE.Vector3( -33, 23, -30),
+	new THREE.Vector3( -43, 23, -50),
+	new THREE.Vector3( -53, 23, -70),
+	new THREE.Vector3( -63, 23, -90),
+	new THREE.Vector3( -73, 23, -110),
+	new THREE.Vector3( -83, 23, -130),
+	new THREE.Vector3( -93, 23, -150)
+      ]);
+
+      var material = new THREE.LineBasicMaterial
+      ({
+	color: 0xff00f0,
+      });
+
+      var geometry = new THREE.Geometry();
+      var splinePoints = planeSpline.getPoints(numPoints);
+
+      for(var i = 0; i < splinePoints.length; i++){
+	geometry.vertices.push(splinePoints[i]);  
+      }
+
+      var line = new THREE.Line(geometry, material);
+      scene.add(line);
+    }
+    
+    function cameraSplineSetUp()
+    {
+      // smooth my curve over this many points
+      var numPoints = 100;
+      
+      //spline
+      cameraSpline = new THREE.SplineCurve3
+      ([
+	new THREE.Vector3( 0, 250, 700),
+	new THREE.Vector3( 0, 250, 650),
+        new THREE.Vector3( 0, 250, 600),
+	new THREE.Vector3( 0, 250, 550),
+        new THREE.Vector3( 0, 250, 500),
+        new THREE.Vector3( 0, 250, 450),
+        new THREE.Vector3( 0, 250, 400),
+	new THREE.Vector3( 0, 250, 350),
+	new THREE.Vector3( 0, 250, 300),
+	new THREE.Vector3( 0, 230, 250),
+	new THREE.Vector3( 0, 200, 200),
+	new THREE.Vector3( 0, 180, 150),
+	new THREE.Vector3( 0, 150, 120)
+      ]);
+
+      var material = new THREE.LineBasicMaterial
+      ({
+	color: 0xff00f0,
+      });
+
+      var geometry = new THREE.Geometry();
+      var splinePoints = cameraSpline.getPoints(numPoints);
+
+      for(var i = 0; i < splinePoints.length; i++){
+	geometry.vertices.push(splinePoints[i]);  
+      }
+
+      var line = new THREE.Line(geometry, material);
+      scene.add(line);
+    }
+    
     function render() {
 	requestAnimationFrame(render);
         renderer.render(scene, camera);
         
-        console.log(Math.floor(music.currentTime));
+	if (Math.floor(music.currentTime)==0)
+	{
+	    if(c==0)
+	    {
+	      setInterval(attachCam, 35);
+              c++;
+	    }
+	}
+	
         if(Math.floor(music.currentTime) == 10)
         {
             if(a == 0)
             {
               setUpTween();
-                a++;
+              a++;
             }
         }
         
@@ -167,8 +246,8 @@
         {
             if(b == 0)
             {
-                setInterval(attachBox, 35);
-                b++;
+              setInterval(attachBox, 12);
+              b++;
             }
         }
     }
@@ -180,11 +259,11 @@
       
       heartInc += 0.000035;
       
-      console.log(heartMesh.position.y);
+      //console.log(heartMesh.position.y);
       
       heartMesh.position.y += (1/heartInc);
       
-      console.log(heartMesh.position.y);
+      //console.log(heartMesh.position.y);
       
       if (heartMesh.position.y >= 23) {
 	
@@ -201,8 +280,25 @@
     function attachBox() {
       
       if ( counter <= 1 ) {
-	box.position = spline.getPoint( counter );
-	box.rotation = spline.getTangent( counter );
+	box.position = planeSpline.getPoint( counter );
+	box.rotation = planeSpline.getTangent( counter );
+	counter += 0.005
+      } else {
+	counter = 0;
+      }
+      
+    }
+    
+    function attachCam() {
+      
+      if (camera.position.z <=130) {
+	alert('yo');
+      }
+      
+      else if ( counter <= 1 ) {
+	camera.position = cameraSpline.getPoint( counter );
+	//camera.rotation = cameraSpline.getTangent( counter );
+	camera.lookAt(scene.position);
 	counter += 0.005
       } else {
 	counter = 0;

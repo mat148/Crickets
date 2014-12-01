@@ -148,7 +148,7 @@
                 new THREE.Vector3( -63, 23, -90),
                 new THREE.Vector3( -73, 23, -110),
                 new THREE.Vector3( -83, 23, -130),
-                new THREE.Vector3( -93, 23, -150)
+                new THREE.Vector3( -93, 25, -150)
             ]);
 
             var material = new THREE.LineBasicMaterial
@@ -228,7 +228,7 @@
             }
 
             if(Math.floor(music.currentTime) == 13)
-            {
+            {   
                 if(b == 0)
                 {
                     setInterval(attachPlane, 12);
@@ -257,8 +257,14 @@
         
         var t = 0;
         function attachPlane() {
-
-            if ( counter <= 1 ) {
+            
+            //console.log(planeMesh.y);
+            
+            if(planeMesh.position.y >= 25)
+            {
+            }
+            
+            else if ( counter <= 1 ) {
                 planeMesh.position = planeSpline.getPoint( counter );
                 planeMesh.rotation = planeSpline.getTangent( counter );
                 counter += 0.005
@@ -272,7 +278,7 @@
                 tangent = planeSpline.getTangent( t ).normalize();
 
                 // calculate the axis to rotate around
-                axis.cross( up, tangent ).normalize();
+                axis.crossVectors( up, tangent ).normalize();
 
                 // calcluate the angle between the up vector and the tangent
                 radians = Math.acos( up.dot( tangent ) );

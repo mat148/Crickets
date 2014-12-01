@@ -35,10 +35,12 @@
     <!-- Javascript code that runs our Three.js examples -->
     <script type="text/javascript">
         // once everything is loaded, we run our Three.js stuff.
-        var scene, camera, renderer, box, spline, counter;
+        var scene, camera, renderer, box, spline, counter, marker, pt;
         var music = document.getElementById("cricketsAudio");
         var heartMesh;
         var planeMesh;
+        var up = new THREE.Vector3( -1, 0, 0 );
+        var axis = new THREE.Vector3( );
 
         init();
 
@@ -264,7 +266,7 @@
 
                 // set the marker position
                 pt = planeSpline.getPoint( t );
-                marker.position.set( pt.x, pt.y, pt.z );
+                planeMesh.position.set( pt.x, pt.y, pt.z );
 
                 // get the tangent to the curve
                 tangent = planeSpline.getTangent( t ).normalize();
@@ -276,7 +278,7 @@
                 radians = Math.acos( up.dot( tangent ) );
 
                 // set the quaternion
-                marker.quaternion.setFromAxisAngle( axis, radians );
+                planeMesh.quaternion.setFromAxisAngle( axis, radians );
 
                 t = (t >= 1) ? 0 : t += 0.002;
             } 

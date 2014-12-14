@@ -61,7 +61,7 @@
         // once everything is loaded, we run our Three.js stuff.
         var scene, camera, renderer, box, spline, counter, marker, pt;
         var music = document.getElementById("cricketsAudio");
-        var video, videoImage, videoImageContext, videoTexture;
+        //var video1, video2, videoImage, videoImageContext, videoTexture;
         var heartMesh;
         var planeMesh;
         var up = new THREE.Vector3( -1, 0, 0 );
@@ -69,14 +69,63 @@
         
         scene = new THREE.Scene();
         
-        ChromaKeyMaterial = function (url, width, height, keyColor) {
+        ChromaKeyMaterial1 = function (url, width, height, keyColor) {
             THREE.ShaderMaterial.call(this);
+            document.var = video1 = document.createElement('video');
+            video1.loop = true;
+            video1.src = url;
+            video1.load();
 
-            video = document.createElement('video');
-            video.loop = true;
-            video.src = url;
-            video.load();
-            //video.play();
+            var videoImage = document.createElement ('canvas');
+            if (window["webkitURL"]) document.body.appendChild(videoImage);
+            videoImage.width = 654;
+            videoImage.height = 480;
+
+            var keyColorObject = new THREE.Color(keyColor);
+
+            var videoImageContext = videoImage.getContext('2d');
+            // background color if no video present
+            videoImageContext.fillStyle = '#' + keyColorObject.getHexString();
+            videoImageContext.fillRect(0, 0, videoImage.width, videoImage.height);
+
+            var videoTexture = new THREE.Texture(videoImage);
+            videoTexture.minFilter = THREE.LinearFilter;
+            videoTexture.magFilter = THREE.LinearFilter;
+
+            this.update = function () {
+                if (video1.readyState === video1.HAVE_ENOUGH_DATA) {
+                    videoImageContext.drawImage(video1, 0, 0);
+                    if (videoTexture) {
+                        videoTexture.needsUpdate = true;
+                    }
+                }
+            }
+
+            this.setValues({
+
+                uniforms: {
+                    texture: {
+                        type: "t",
+                        value: videoTexture
+                    },
+                    color: {
+                        type: "c",
+                        value: keyColorObject
+                    }
+                },
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent,
+
+                transparent: true
+            });
+        }
+        
+        ChromaKeyMaterial2 = function (url, width, height, keyColor) {
+            THREE.ShaderMaterial.call(this);
+            document.var = video2 = document.createElement('video');
+            video2.loop = true;
+            video2.src = url;
+            video2.load();
 
             var videoImage = document.createElement('canvas');
             if (window["webkitURL"]) document.body.appendChild(videoImage);
@@ -95,7 +144,7 @@
             videoTexture.magFilter = THREE.LinearFilter;
 
             this.update = function () {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                if (video2.readyState === video2.HAVE_ENOUGH_DATA) {
                     videoImageContext.drawImage(video, 0, 0);
                     if (videoTexture) {
                         videoTexture.needsUpdate = true;
@@ -122,11 +171,8 @@
             });
         }
         
-        ChromaKeyMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
-
-        var movieMaterial = new ChromaKeyMaterial('video/Comp1.webm', 654, 480, 000000);
-        //var movieGeometry = new THREE.PlaneGeometry( 204, 150, 4, 4 );
-        //var movie = new THREE.Mesh(movieGeometry, movieMaterial);
+        ChromaKeyMaterial1.prototype = Object.create(THREE.ShaderMaterial.prototype);
+        ChromaKeyMaterial2.prototype = Object.create(THREE.ShaderMaterial.prototype);
         
         init();
 
@@ -162,27 +208,9 @@
             renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMapEnabled = true;
-
-            //controls = new THREE.OrbitControls( camera, renderer.domElement );
             
-            // = videoImage.getContext( '2d' );
-            // background color if no video present
-            //videoImageContext.fillStyle = '#000000';
-            //videoImageContext.fillRect( 0, 0, 50, 50);
-
-            // create the ground plane
-            var floorGeometry = new THREE.PlaneGeometry( 204, 150, 4, 4 );
-            //var floorMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
-            var floor = new THREE.Mesh(floorGeometry,movieMaterial);
-            //plane.receiveShadow  = true;
-
-            // rotate and position the plane
-            floor.position.set(0,0,0);
-            floor.rotation.set(-90,0,0);
-            //movieMaterial.position.set(0,0,0);
-
-            // add the plane to the scene
-            scene.add(floor);
+            bookSetUp();
+            godHandCreate();
 
             // load heart
             var heartModel = new THREE.JSONLoader();
@@ -232,6 +260,35 @@
 
             // add the output of the renderer to the html element
             $("#WebGL-output").append(renderer.domElement);
+        }
+        
+        function bookSetUp()
+        {
+            document.var = bookMaterial = new ChromaKeyMaterial1('video/Comp1.webm', 654, 480, 000000);
+            
+            // create the ground plane
+            var floorGeometry = new THREE.PlaneGeometry( 204, 150, 4, 4 );
+            var floor = new THREE.Mesh(floorGeometry,bookMaterial);
+
+            // rotate and position the plane
+            floor.position.set(0,0,0);
+            floor.rotation.set(-90,0,0);
+
+            // add the plane to the scene
+            scene.add(floor);
+        }
+        
+        function godHandCreate()
+        {
+            document.var = leftArmMaterial = new ChromaKeyMaterial2('video/leftArm.webm', 654, 480, 000000);
+            
+            var leftArmGeometry = new THREE.PlaneGeometry( 654, 480, 4, 4);
+            leftArmGod  = new THREE.Mesh(leftArmGeometry, leftArmMaterial);
+            
+            leftArmGod.position.set(-120, 25, -135);
+            leftArmGod.rotation.set(0,-90,0);
+            
+            scene.add(leftArmGod);
         }
 
         function planeSplineSetUp(){
@@ -322,14 +379,14 @@
 
         function render() {
             requestAnimationFrame(render);
-            movieMaterial.update();
+            bookMaterial.update();
             renderer.render(scene, camera);
             
             //checkMusicTime();
             
             if(Math.floor(music.currentTime) == 3)
                 {
-                    video.play();
+                    video1.play();
                 }
 
                 if(Math.floor(music.currentTime) >= 9)

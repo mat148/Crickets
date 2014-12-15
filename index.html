@@ -62,6 +62,7 @@
         var scene, camera, renderer, box, spline, counter, marker, pt;
         var music = document.getElementById("cricketsAudio");
         var video, videoImage, videoImageContext, videoTexture;
+        var video2, videoImage2, videoImageContext2, videoTexture2;
         var heartMesh;
         var planeMesh;
         var up = new THREE.Vector3( -1, 0, 0 );
@@ -80,8 +81,8 @@
 
             var videoImage = document.createElement('canvas');
             if (window["webkitURL"]) document.body.appendChild(videoImage);
-            videoImage.width = 654;
-            videoImage.height = 480;
+            videoImage.width = width;
+            videoImage.height = height;
 
             var keyColorObject = new THREE.Color(keyColor);
 
@@ -122,9 +123,64 @@
             });
         }
         
+        ChromaKeyMaterial2 = function (url, width, height, keyColor) {
+            THREE.ShaderMaterial.call(this);
+
+            video2 = document.createElement('video');
+            video2.loop = true;
+            video2.src = url;
+            video2.load();
+            //video.play();
+
+            var videoImage2 = document.createElement('canvas');
+            if (window["webkitURL"]) document.body.appendChild(videoImage2);
+            videoImage2.width = width;
+            videoImage2.height = height;
+
+            var keyColorObject = new THREE.Color(keyColor);
+
+            var videoImageContext2 = videoImage2.getContext('2d');
+            // background color if no video present
+            videoImageContext2.fillStyle = '#' + keyColorObject.getHexString();
+            videoImageContext2.fillRect(0, 0, videoImage2.width, videoImage2.height);
+
+            var videoTexture = new THREE.Texture(videoImage2);
+            videoTexture.minFilter = THREE.LinearFilter;
+            videoTexture.magFilter = THREE.LinearFilter;
+
+            this.update = function () {
+                if (video2.readyState === video2.HAVE_ENOUGH_DATA) {
+                    videoImageContext2.drawImage(video2, 0, 0);
+                    if (videoTexture) {
+                        videoTexture.needsUpdate = true;
+                    }
+                }
+            }
+
+            this.setValues({
+
+                uniforms: {
+                    texture: {
+                        type: "t",
+                        value: videoTexture
+                    },
+                    color: {
+                        type: "c",
+                        value: keyColorObject
+                    }
+                },
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent,
+
+                transparent: true
+            });
+        }
+        
         ChromaKeyMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
+        ChromaKeyMaterial2.prototype = Object.create(THREE.ShaderMaterial.prototype);
 
         var movieMaterial = new ChromaKeyMaterial('video/Comp1.webm', 654, 480, 000000);
+        var movieMaterial2 = new ChromaKeyMaterial2('video/leftArm.webm', 654, 480, 000000);
         //var movieGeometry = new THREE.PlaneGeometry( 204, 150, 4, 4 );
         //var movie = new THREE.Mesh(movieGeometry, movieMaterial);
         
@@ -183,6 +239,19 @@
 
             // add the plane to the scene
             scene.add(floor);
+            
+            // create the ground plane
+            var floorGeometry2 = new THREE.PlaneGeometry( 204, 150, 4, 4 );
+            var arm = new THREE.Mesh(floorGeometry2,movieMaterial2);
+            //plane.receiveShadow  = true;
+
+            // rotate and position the plane
+            arm.position.set(50,0,0);
+            arm.rotation.set(-90,0,0);
+            //movieMaterial.position.set(0,0,0);
+
+            // add the plane to the scene
+            scene.add(arm);
 
             // load heart
             var heartModel = new THREE.JSONLoader();
@@ -323,6 +392,7 @@
         function render() {
             requestAnimationFrame(render);
             movieMaterial.update();
+            movieMaterial2.update();
             renderer.render(scene, camera);
             
             //checkMusicTime();
@@ -330,6 +400,7 @@
             if(Math.floor(music.currentTime) == 3)
                 {
                     video.play();
+                    video2.play();
                 }
 
                 if(Math.floor(music.currentTime) >= 9)

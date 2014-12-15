@@ -154,7 +154,9 @@
             
             ChromaKeyMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype); 
             console.log(videoImageContext +'0.1');
-            window.var = bookMaterial = new ChromaKeyMaterial('video/Comp1.webm', 654, 480, 000000);
+            window.var = bookMaterial = new ChromaKeyMaterial('video/Comp1.webm', 654, 480, 0xd400);
+            
+            createBook();
         }
         
         function animate()
@@ -166,8 +168,10 @@
         
         function update()
         {
-            if(Math.floor(music.currentTime) == 3)
+            console.log(Math.floor(music.currentTime));
+                if(Math.floor(music.currentTime) == 3)
                 {
+                    debugger;
                     video.play();
                 }
 
@@ -191,17 +195,20 @@
         {
             THREE.ShaderMaterial.call(this);
             video = document.createElement('video');
-            video.loop = true;
-            video.src = 'video/Comp1.webm';
+            //video.loop = true;
+            video.src = url;
             video.load();
+            video.play();
+            
+            console.log(video);
             
             var videoImage = document.createElement ('canvas');
-            videoImage.width = 654;
-            videoImage.height = 480;
+            videoImage.width = width;
+            videoImage.height = height;
             
-            var keyColorObject = new THREE.Color(000000);
+            var keyColorObject = new THREE.Color(keyColor);
             console.log(videoImageContext +'0.2');
-            var videoImageContext = videoImage.getContext('2d');
+            videoImageContext = videoImage.getContext('2d');
             videoImageContext.fillStyle = '#' + keyColorObject.getHexString();
             videoImageContext.fillRect(0, 0, videoImage.width, videoImage.height);
             console.log(videoImageContext +'0.3');
@@ -234,7 +241,6 @@
         {
             //alert(video);
             var bookGeometry = new THREE.PlaneGeometry( 204, 150, 4, 4 );
-            //var bookMaterial = new THREE.LineBasicMaterial({color: 0xff00f0,});
             var book = new THREE.Mesh(bookGeometry,bookMaterial);
             book.position.set(0,0,0);
             book.rotation.set(-90,0,0);
@@ -424,15 +430,16 @@
         }
         
         function render() {
-            renderer.render(scene, camera);
             
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                console.log(videoImageContext +'1');
                     videoImageContext.drawImage(video, 0, 0);
                     if (videoTexture) {
                         videoTexture.needsUpdate = true;
                     }
             }
+            
+            
+            renderer.render(scene, camera);
         }
 </script>
 </body>
